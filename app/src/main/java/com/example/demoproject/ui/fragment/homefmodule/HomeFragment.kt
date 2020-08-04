@@ -14,6 +14,8 @@ import com.example.demoproject.room.DatabaseHelper
 import com.example.demoproject.ui.fragment.homefmodule.adapter.HomeAdapter
 import com.example.demoproject.ui.profilemodule.ProfileActivity
 import com.example.demoproject.utils.DialogUtils
+import com.example.demoproject.utils.SessionManger
+import com.example.demoproject.utils.SessionManger.Companion.PREF_FILE_NAME
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.*
 
@@ -23,7 +25,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(), HomeNav
     val homeViewModel: HomeViewModel by viewModel()
     var homeAdapter: HomeAdapter? = null
     var homeNavigator: HomeNavigator? = null
-
+    var sessionManger: SessionManger? = null
 
     override fun getLayoutId(): Int {
         return R.layout.fragment_home
@@ -37,13 +39,40 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(), HomeNav
         fragmentHomeBinding = getViewDataBinding()
         fragmentHomeBinding!!.homeCallBack = this
         homeNavigator = this
+        sessionManger = SessionManger(activity!!, PREF_FILE_NAME)
 
-        initview()
+        if (sessionManger!!.getApiConstant().equals("")) {
+            initview()
+        } else {
+            refreshAdapter()
+        }
+
+
+    }
+
+    private fun refreshAdapter() {
+        DialogUtils.stopProgressDialog()
+        var userList =
+            DatabaseHelper.getDatabase(activity!!).interfaceDao().getAllUserList()
+        homeAdapter = HomeAdapter(
+            activity!!,
+            userList as ArrayList<UserListEntity>,
+            homeNavigator as HomeFragment
+        )
+        fragmentHomeBinding?.recyclerUserList?.setHasFixedSize(true)
+        val mLayoutManager: RecyclerView.LayoutManager =
+            LinearLayoutManager(activity!!)
+        fragmentHomeBinding?.recyclerUserList?.layoutManager = mLayoutManager
+        fragmentHomeBinding?.recyclerUserList?.itemAnimator = DefaultItemAnimator()
+
+
+        fragmentHomeBinding?.recyclerUserList?.adapter = homeAdapter
+
     }
 
     private fun initview() {
 
-        DatabaseHelper.getDatabase(activity!!).interfaceDao().deleteAllUsers()
+          DatabaseHelper.getDatabase(activity!!).interfaceDao().deleteAllUsers()
         homeViewModel.getUserList(
         ).observe(this, androidx.lifecycle.Observer {
             if (it != null) {
@@ -56,22 +85,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(), HomeNav
                     userListEntity.avatar = it.data!!.get(i).avatar.toString()
                     DatabaseHelper.getDatabase(activity!!).interfaceDao().addUsers(userListEntity)
                 }
+                sessionManger?.setApiConstant("1")
                 DialogUtils.stopProgressDialog()
-                var userList = DatabaseHelper.getDatabase(activity!!).interfaceDao().getAllUserList()
-                homeAdapter = HomeAdapter(
-                    activity!!,
-                    userList as ArrayList<UserListEntity>,
-                    homeNavigator as HomeFragment
-                )
-                fragmentHomeBinding?.recyclerUserList?.setHasFixedSize(true)
-                val mLayoutManager: RecyclerView.LayoutManager =
-                    LinearLayoutManager(activity!!)
-                fragmentHomeBinding?.recyclerUserList?.layoutManager = mLayoutManager
-                fragmentHomeBinding?.recyclerUserList?.itemAnimator = DefaultItemAnimator()
-
-
-                fragmentHomeBinding?.recyclerUserList?.adapter = homeAdapter
-
+                refreshAdapter()
             } else {
                 DialogUtils.stopProgressDialog()
 

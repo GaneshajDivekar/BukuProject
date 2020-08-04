@@ -40,11 +40,26 @@ public class SessionManger(context: Context, prefFileName: String) {
     }
 
 
+    fun getApiConstant(): String {
+        return mPrefs.getString(
+            API_CONSTANT,
+            ""
+        )
+    }
+
+
+    fun setApiConstant(flag: String) {
+        mPrefs.edit().putString(API_CONSTANT, flag)
+            .apply()
+    }
+
+
     companion object {
         const val PREF_FILE_NAME = "SmartMart.pref"
 
         private const val PREF_FLASH = "flash"
         private const val PREF_FRONT = "front"
+        private const val API_CONSTANT = "api_constant"
 
 
     }
