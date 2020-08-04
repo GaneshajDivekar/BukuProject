@@ -55,8 +55,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(), HomeNav
                     userListEntity.last_name = it.data!!.get(i).lastName.toString()
                     userListEntity.avatar = it.data!!.get(i).avatar.toString()
                     DatabaseHelper.getDatabase(activity!!).interfaceDao().addUsers(userListEntity)
-
-
                 }
                 DialogUtils.stopProgressDialog()
                 var userList = DatabaseHelper.getDatabase(activity!!).interfaceDao().getAllUserList()

@@ -19,6 +19,8 @@ import com.example.demoproject.data.db.UserListEntity
 import com.example.demoproject.databinding.FragmentProfileBinding
 import com.example.demoproject.room.DatabaseHelper
 import com.example.demoproject.ui.cameraModule.CameraActivity
+import com.example.demoproject.ui.mainModule.MainActivity
+import com.example.demoproject.ui.profilemodule.ProfileActivity
 import com.example.demoproject.utils.ImageHelper
 import com.example.demoproject.utils.copyFileOrDirectory
 import com.example.demoproject.utils.getImagePath
@@ -69,15 +71,34 @@ class ProfileFragment : BaseFragment<FragmentProfileBinding, ProfileViewModel>()
     }
 
     override fun clickOnCreateProfile() {
-        var userlistModel = UserListEntity()
-        userlistModel.first_name = fragmentProfileBinding!!.edtFirstNameResult.text.toString()
-        userlistModel.last_name = fragmentProfileBinding!!.edtLastNameResult.text.toString()
-        userlistModel.email = fragmentProfileBinding!!.edtEmailResult.text.toString()
-        userlistModel.avatar = photoPath.toString()
+        if(fragmentProfileBinding!!.edtFirstNameResult!!.text.equals(""))
+        {
+            Toast.makeText(activity!!, "Please Enter First Name", Toast.LENGTH_SHORT).show()
 
-        DatabaseHelper.getDatabase(activity!!).interfaceDao().addUsers(userlistModel)
-        Toast.makeText(activity!!, "User data added successfully", Toast.LENGTH_SHORT).show()
+        }else if(fragmentProfileBinding!!.edtLastNameResult!!.text.equals(""))
+        {
+            Toast.makeText(activity!!, "Please Enter Last Name", Toast.LENGTH_SHORT).show()
 
+        }else if(fragmentProfileBinding!!.edtEmailResult!!.text.equals(""))
+        {
+            Toast.makeText(activity!!, "Please Enter Email", Toast.LENGTH_SHORT).show()
+
+        }else if(photoPath.toString().equals(""))
+        {
+            Toast.makeText(activity!!, "Please Capture Photo", Toast.LENGTH_SHORT).show()
+        }else{
+            var userlistModel = UserListEntity()
+            userlistModel.first_name = fragmentProfileBinding!!.edtFirstNameResult.text.toString()
+            userlistModel.last_name = fragmentProfileBinding!!.edtLastNameResult.text.toString()
+            userlistModel.email = fragmentProfileBinding!!.edtEmailResult.text.toString()
+            userlistModel.avatar = photoPath.toString()
+            DatabaseHelper.getDatabase(activity!!).interfaceDao().addUsers(userlistModel)
+            Toast.makeText(activity!!, "User data added successfully", Toast.LENGTH_SHORT).show()
+            var intent = Intent(activity!!, MainActivity::class.java)
+            startActivity(intent)
+            activity!!.finish()
+
+        }
     }
 
     override fun clickOnCamera() {
